@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: single
+            cmake_args: -DDOUBLE_PRECISION=OFF
+          - name: double
+            cmake_args: -DDOUBLE_PRECISION=ON
+
+    name: Build ${{ matrix.name }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Install CUDA
+        uses: Jimver/cuda-toolkit@v0.2.22
+        with:
+          cuda: "12.4.1"
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y cmake ninja-build g++
+
+      - name: Check CUDA compiler
+        run: nvcc --version
+
+      - name: Configure
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            ${{ matrix.cmake_args }}
+
+      - name: Build
+        run: cmake --build build --parallel

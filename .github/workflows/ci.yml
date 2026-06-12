@@ -28,9 +28,9 @@ jobs:
     steps:
 
      - name: Install git
-       run: |
-       apt-get update
-       apt-get install -y git
+       run:  |
+             apt-get update
+             apt-get install -y git
 
       - name: Checkout
         uses: actions/checkout@v4

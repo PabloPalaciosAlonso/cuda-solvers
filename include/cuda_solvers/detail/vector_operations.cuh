@@ -98,7 +98,7 @@ namespace cuda_solvers{
                      const T scalar,
                      thrust::device_vector<T>& out,
                      const cudaStream_t st = 0) {
-    multiply(v, 1.0/scalar, out, st);
+    multiply(v, T(1.0)/scalar, out, st);
   }
      
   template<class T>

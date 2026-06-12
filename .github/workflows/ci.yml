@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     strategy:
       fail-fast: false
@@ -22,6 +22,9 @@ jobs:
 
     name: Build ${{ matrix.name }}
 
+    container:
+      image: nvidia/cuda:12.4.1-devel-ubuntu22.04
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,15 +32,10 @@ jobs:
           fetch-depth: 0
           submodules: recursive
 
-      - name: Install CUDA
-        uses: Jimver/cuda-toolkit@v0.2.35
-        with:
-          cuda: "12.4.1"
-
       - name: Install dependencies
         run: |
-          sudo apt update
-          sudo apt install -y cmake ninja-build g++
+          apt-get update
+          apt-get install -y cmake ninja-build g++
 
       - name: Check CUDA compiler
         run: nvcc --version

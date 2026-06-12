@@ -15,6 +15,7 @@ Makefile
 *.a
 *.out
 *~
+*#
 
 .vscode/
 .idea/

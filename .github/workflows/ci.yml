@@ -26,21 +26,16 @@ jobs:
       image: nvidia/cuda:12.4.1-devel-ubuntu22.04
 
     steps:
-      - name: Install git
+      - name: Install dependencies
         run: |
           apt-get update
-          apt-get install -y git
+          apt-get install -y git cmake ninja-build g++
 
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: recursive
-
-      - name: Install dependencies
-        run: |
-          apt-get update
-          apt-get install -y cmake ninja-build g++
 
       - name: Check CUDA compiler
         run: nvcc --version
@@ -49,6 +44,7 @@ jobs:
         run: |
           cmake -S . -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CUDA_ARCHITECTURES=86 \
             ${{ matrix.cmake_args }}
 
       - name: Build

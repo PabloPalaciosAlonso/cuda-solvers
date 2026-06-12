@@ -10,6 +10,12 @@ option(BUILD_TESTS "Build C++ tests" ON)
 option(BUILD_EXAMPLES "Build examples" ON)
 option(DOUBLE_PRECISION "Use double precision" ON)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_CUDA_STANDARD 17)
+set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+
 add_library(cuda_solvers INTERFACE)
 
 target_include_directories(cuda_solvers
@@ -19,8 +25,7 @@ target_include_directories(cuda_solvers
 
 target_compile_features(cuda_solvers
   INTERFACE
-    cxx_std_20
-    cuda_std_20
+    cxx_std_17
 )
 
 if(DOUBLE_PRECISION)
@@ -31,4 +36,3 @@ if(BUILD_TESTS)
   enable_testing()
   add_subdirectory(tests)
 endif()
-

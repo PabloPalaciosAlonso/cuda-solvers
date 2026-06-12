@@ -4,6 +4,7 @@
 #include <thrust/execution_policy.h>
 #include <thrust/transform_reduce.h>
 #include <thrust/inner_product.h>
+#include <thrust/iterator/constant_iterator.h>
 #include"cuda_solvers/types.h"
 
 namespace cuda_solvers{

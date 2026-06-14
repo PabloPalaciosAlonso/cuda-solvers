@@ -80,12 +80,12 @@ namespace cuda_solvers::gmres{
       for (int i = 0; i < j + 1; ++i) {
         getColumn(krylovBase, vi, i, st);
         const T hij = dotc(vi, w, st);
-        H[index2D(i, j, restart)] = hij;
+        H[index2D(i, j, restart + 1)] = hij;
         axpy(vi, w, w, -hij, st);
       }
       
       const real hnext              = norm(w, st);
-      H[index2D(j + 1, j, restart)] = T(hnext);
+      H[index2D(j + 1, j, restart + 1)] = T(hnext);
       
       if (std::abs(hnext) <= std::numeric_limits<real>::epsilon()) {
         return false;
@@ -186,8 +186,8 @@ namespace cuda_solvers::gmres{
       int restart      = work.restart;
       
       for (int i = 0; i < j + 1; ++i) {
-        const real hij  = hessenberg[index2D(i,     j, restart)];
-        const real hi1j = hessenberg[index2D(i + 1, j, restart)];
+        const real hij  = hessenberg[index2D(i,     j, restart + 1)];
+        const real hi1j = hessenberg[index2D(i + 1, j, restart + 1)];
         real c_i = cosGivens[i];
         real s_i = sinGivens[i];
         
@@ -200,8 +200,8 @@ namespace cuda_solvers::gmres{
         const auto [hijrot, hi1jrot] = apply2Drotation(c_i, s_i,
                                                        hij, hi1j);
         
-        hessenberg[index2D(i, j, restart)]     = hijrot;
-        hessenberg[index2D(i + 1, j, restart)] = hi1jrot;
+        hessenberg[index2D(i, j, restart + 1)]     = hijrot;
+        hessenberg[index2D(i + 1, j, restart + 1)] = hi1jrot;
       }
       
       auto [newgj, newgj1] = apply2Drotation(cosGivens[j],
@@ -225,8 +225,8 @@ namespace cuda_solvers::gmres{
       int restart      = work.restart;
       
       for (int i = 0; i < j + 1; ++i) {
-        const complex hij  = hessenberg[index2D(i,     j, restart)];
-        const complex hi1j = hessenberg[index2D(i + 1, j, restart)];
+        const complex hij  = hessenberg[index2D(i,     j, restart + 1)];
+        const complex hi1j = hessenberg[index2D(i + 1, j, restart + 1)];
         
         real c_i    = cosGivens[i];
         complex s_i = sinGivens[i];
@@ -240,8 +240,8 @@ namespace cuda_solvers::gmres{
         const auto [hijrot, hi1jrot] =
           apply2Drotation(c_i, s_i, hij, hi1j);
     
-        hessenberg[index2D(i,     j, restart)] = hijrot;
-        hessenberg[index2D(i + 1, j, restart)] = hi1jrot;
+        hessenberg[index2D(i,     j, restart + 1)] = hijrot;
+        hessenberg[index2D(i + 1, j, restart + 1)] = hi1jrot;
       }
   
       auto [newgj, newgj1] =
@@ -329,7 +329,7 @@ namespace cuda_solvers::gmres{
       for (int i = 0; i < j_final; ++i) {
         gsmall[i] = work.g[i];
         for (int j = 0; j < j_final; ++j) {
-          Rsmall[index2D(i, j, j_final)] = work.hessenberg[index2D(i, j, restart)];
+          Rsmall[index2D(i, j, j_final)] = work.hessenberg[index2D(i, j, restart + 1)];
         }
       }
       

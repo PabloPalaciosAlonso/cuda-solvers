@@ -194,7 +194,7 @@ TEST(GMRES, triangularizeGivensReal) {
 
   for (int j = 0; j < restart; ++j) {
     for (int i = 0; i <= j + 1; ++i) {
-      work.hessenberg[index2D(i, j, restart)] =
+      work.hessenberg[index2D(i, j, restart + 1)] =
           static_cast<real>(1 + i + 3 * j);
     }
   }
@@ -204,12 +204,12 @@ TEST(GMRES, triangularizeGivensReal) {
   for (int j = 0; j < restart; ++j) {
     detail::triangularizeGivens(work, j, norm_b);
 
-    EXPECT_NEAR(work.hessenberg[index2D(j + 1, j, restart)], real(0), 1e-12);
+    EXPECT_NEAR(work.hessenberg[index2D(j + 1, j, restart + 1)], real(0), 1e-12);
   }
 
   for (int j = 0; j < restart; ++j) {
     for (int i = j + 1; i < restart + 1; ++i) {
-      EXPECT_NEAR(work.hessenberg[index2D(i, j, restart)], real(0), 1e-12);
+      EXPECT_NEAR(work.hessenberg[index2D(i, j, restart + 1)], real(0), 1e-12);
     }
   }
 }
@@ -273,7 +273,7 @@ TEST(GMRES, triangularizeGivensComplex) {
       const real re = static_cast<real>(1 + i + 3 * j);
       const real im = static_cast<real>(0.2 * (i + 1) - 0.1 * (j + 1));
 
-      work.hessenberg[index2D(i, j, restart)] = complex(re, im);
+      work.hessenberg[index2D(i, j, restart + 1)] = complex(re, im);
     }
   }
 
@@ -282,14 +282,14 @@ TEST(GMRES, triangularizeGivensComplex) {
   for (int j = 0; j < restart; ++j) {
     detail::triangularizeGivens(work, j, norm_b);
 
-    EXPECT_NEAR(thrust::abs(work.hessenberg[index2D(j + 1, j, restart)]),
+    EXPECT_NEAR(thrust::abs(work.hessenberg[index2D(j + 1, j, restart + 1)]),
                 real(0),
                 tol);
   }
 
   for (int j = 0; j < restart; ++j) {
     for (int i = j + 1; i < restart + 1; ++i) {
-      EXPECT_NEAR(thrust::abs(work.hessenberg[index2D(i, j, restart)]),
+      EXPECT_NEAR(thrust::abs(work.hessenberg[index2D(i, j, restart + 1)]),
                   real(0),
                   tol);
     }

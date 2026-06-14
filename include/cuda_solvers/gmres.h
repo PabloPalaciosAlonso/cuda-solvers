@@ -14,6 +14,6 @@ namespace cuda_solvers::gmres{
                   const thrust::device_vector<T>& b,
                   const thrust::device_vector<T>& initialGuess,
                   const Parameters& params,
-                  const cudaStream_t st);
+                  cudaStream_t st);
 }
 #include "cuda_solvers/detail/gmres_impl.cuh"

@@ -1,4 +1,5 @@
 #pragma once
+#include <thrust/execution_policy.h>
 #include "cuda_solvers/types.h"
 
 
@@ -12,22 +13,21 @@ namespace cuda_solvers{
   }
 
   
-  inline int index2D(int i, int j, int ncols) {
-    return i * ncols + j; // row-major
+  inline int index2D(int i, int j, int nrows) {
+    return i + nrows * j;
   }
   
   template <class T>
-  inline thrust::device_vector<T> getColumn(const thrust::device_vector<T>& matrix,
-                                            thrust::device_vector<T>& out,
-                                            const int col,
-                                            const cudaStream_t st) {
+  inline void getColumn(const thrust::device_vector<T>& matrix,
+                        thrust::device_vector<T>& out,
+                        const int col,
+                        const cudaStream_t st) {
     
     int N = out.size();
-    thrust::copy(thrust::device,
+    thrust::copy(thrust::cuda::par.on(st),
                  matrix.begin() + col * N,
                  matrix.begin() + (col + 1) * N,
                  out.begin());
-    return out;
   }
   
   template <class T>
@@ -39,7 +39,7 @@ namespace cuda_solvers{
     
     assert((int)v.size() == N);
     
-    thrust::copy(thrust::device,
+    thrust::copy(thrust::cuda::par.on(st),
                  v.begin(), v.end(),
                  V.begin() + col * N);
   }

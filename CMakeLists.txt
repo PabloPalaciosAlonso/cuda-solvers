@@ -16,6 +16,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CUDA_STANDARD 17)
 set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 
+find_package(CUDAToolkit REQUIRED)
+
 add_library(cuda_solvers INTERFACE)
 
 target_include_directories(cuda_solvers
@@ -23,6 +25,12 @@ target_include_directories(cuda_solvers
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
+
+target_link_libraries(cuda_solvers
+  INTERFACE
+  CUDA::cusolver
+  CUDA::cublas
+)
 target_compile_features(cuda_solvers
   INTERFACE
     cxx_std_17

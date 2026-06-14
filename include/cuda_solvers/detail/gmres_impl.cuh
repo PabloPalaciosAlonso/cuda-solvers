@@ -1,5 +1,4 @@
 #include <thrust/execution_policy.h>
-
 #include "cuda_solvers/types.h"
 #include "cuda_solvers/gmres.h"
 #include "cuda_solvers/detail/vector_operations.cuh"
@@ -258,13 +257,13 @@ namespace cuda_solvers::gmres{
     }
   }
   
-  // op(x, st) \def A*x
+  // Solves op(x, st) = b; with op(x,st) \def A*x being A a matrix
   template<class Operator, class T>
   Result<T> solve(const Operator& op,
                   const thrust::device_vector<T>& b,
                   const thrust::device_vector<T>& initialGuess,
                   const Parameters& params,
-                  const cudaStream_t st) {
+                  cudaStream_t st) {
     
     const int N = b.size();
     assert(initialGuess.size() == b.size());
@@ -286,19 +285,6 @@ namespace cuda_solvers::gmres{
     
     detail::Workspace<T> work(N, restart);
     int total_iters = 0;
-    
-    // thrust::device_vector<T> krylovBase(N * (restart + 1), T());
-    
-    // // Column j stores the coefficients in
-    // // A*v_j = sum_{i=0}^{j+1} hessenberg(i,j) * v_i
-    // std::vector<T> hessenberg((restart + 1) * restart);
-    // std::vector<real> cosGivens(restart);
-    // std::vector<T> sinGivens(restart);
-    // std::vector<T> g(restart + 1);
-    
-    // thrust::device_vector<T> residue(N);
-    // thrust::device_vector<T> v0(N);
-    // thrust::device_vector<T> vk(N);
     
     for (int outer = 0; outer < params.maxIterations; ++outer) {
       

@@ -110,13 +110,13 @@ namespace cuda_solvers::aaj{
       }
     };
 
-    // x_{k+1} = x_k + damping * f
+    // x_{k+1} = x_k + damping * f_k
     inline void performPiccardStep(Workspace<complex>& work,
                                    real damping,
                                    cudaStream_t& st) {
       thrust::transform(thrust::cuda::par.on(st),
                         work.x_old.begin(), work.x_old.end(),
-                        work.f.begin(),
+                        work.f_old.begin(),
                         work.x.begin(),
                         PicardStepFunctor(damping));
     }
@@ -124,19 +124,20 @@ namespace cuda_solvers::aaj{
     
     //x_{k+1} = x_k + damping*f - (X + damping * F)*gammas
     inline  void performAndersonStep(Workspace<complex>& work,
-                                LSWorkspace& lswork,
-                                real damping,
-                                int niter,
-                                cudaStream_t &st){
+                                     LSWorkspace& lswork,
+                                     real damping,
+                                     int niter,
+                                     cudaStream_t &st){
       
       
       
-      int memory = work.memory;
-      int cols   = std::min(memory, niter + 1);
-      int rows   = work.N;
-      
+      int memory   = work.memory;
+      int cols     = std::min(memory, niter + 1);
+      int rows     = work.N;
+      lswork.cols  = cols;
+
       auto& F_diff = work.F_diff;
-      auto& f      = work.f;
+      auto& f_old  = work.f_old;
       auto& gammas = work.gammas;
       
       auto& X_diff = work.X_diff;
@@ -151,7 +152,7 @@ namespace cuda_solvers::aaj{
         throw std::invalid_argument("[AAJ]: Invalid number of columns for least squares (cols <= 0 or cols > rows");
       }
       
-      solve_least_squares(F_diff, f, gammas,
+      solve_least_squares(F_diff, f_old, gammas,
                           lswork, st);
       
       //if (!validGammas(gammas)) return performPiccardStep(x_old, f, damping, st);
@@ -159,7 +160,7 @@ namespace cuda_solvers::aaj{
 
       
       auto x_ptr      = thrust::raw_pointer_cast(x.data());
-      auto f_ptr      = thrust::raw_pointer_cast(f.data());
+      auto f_old_ptr  = thrust::raw_pointer_cast(f_old.data());
       auto x_old_ptr  = thrust::raw_pointer_cast(x_old.data());
       auto X_diff_ptr = thrust::raw_pointer_cast(X_diff.data());
       auto F_diff_ptr = thrust::raw_pointer_cast(F_diff.data());
@@ -168,7 +169,7 @@ namespace cuda_solvers::aaj{
       int THREADS_PER_BLOCK = 128;
       int numBlocks = rows / THREADS_PER_BLOCK + 1;
       updateSolutionAnderson_D<<<numBlocks, THREADS_PER_BLOCK, 0, st>>>(X_diff_ptr, F_diff_ptr,
-                                                                        x_old_ptr, f_ptr,
+                                                                        x_old_ptr, f_old_ptr,
                                                                         gammas_ptr, x_ptr,
                                                                         damping, memory,
                                                                         rows);
@@ -269,7 +270,8 @@ namespace cuda_solvers::aaj{
        
     x_old = initialGuess;
     op(x_old, x, st);
-    op(x, x_pred, st);
+    substract(x, x_old, f_old, st);
+    op(x, x_pred, st);    
     
     //Run the AAJ loop
     while(error>tolerance && totalNiter<maxIterations){
@@ -277,8 +279,8 @@ namespace cuda_solvers::aaj{
       substract(x_pred, x, f, st);
       detail::updateMemoryVectors(work, currentNiter, st);
       x.swap(x_old);
-      detail::performNextStep(work, lswork, params, currentNiter, st);
       f.swap(f_old);
+      detail::performNextStep(work, lswork, params, currentNiter, st);
       op(x, x_pred, st);
       detail::updateErrorAndLogging(work, error, params,
                                     currentNiter, totalNiter,

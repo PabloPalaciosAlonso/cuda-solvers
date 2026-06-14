@@ -1,3 +1,4 @@
+#pragma once
 #include <thrust/device_vector.h>
 #include <thrust/transform.h>
 #include <thrust/functional.h>
@@ -13,7 +14,7 @@ namespace cuda_solvers{
   inline void substract(const thrust::device_vector<T>& v1,
                         const thrust::device_vector<T>& v2,
                         thrust::device_vector<T>& out,
-                        const cudaStream_t st = 0) {
+                        cudaStream_t st = 0) {
     
     assert(v1.size() == v2.size());
     assert(out.size() == v1.size());
@@ -30,7 +31,7 @@ namespace cuda_solvers{
   inline void add(const thrust::device_vector<T>& v1,
                   const thrust::device_vector<T>& v2,
                   thrust::device_vector<T>& out,
-                  const cudaStream_t st = 0) {
+                  cudaStream_t st = 0) {
     
     assert(v1.size() == v2.size());
     assert(out.size() == v1.size());
@@ -47,7 +48,7 @@ namespace cuda_solvers{
   inline void multiply(const thrust::device_vector<T>& v1,
                        const thrust::device_vector<T>& v2,
                        thrust::device_vector<T>& out,
-                       const cudaStream_t st = 0) {
+                       cudaStream_t st = 0) {
 
     assert(v1.size() == v2.size());
     assert(out.size() == v1.size());

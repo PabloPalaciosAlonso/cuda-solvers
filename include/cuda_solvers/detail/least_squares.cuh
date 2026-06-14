@@ -91,9 +91,9 @@ namespace cuda_solvers{
     const int cols = ws.cols;
     
     assert(rows >= cols);
-    assert((int)A.size() = rows * cols);
-    assert((int)b.size() = rows);
-    assert((int)out.size() = cols);
+    assert(A.size() >= rows * cols);
+    assert(b.size() >= rows);
+    assert(out.size() >= cols);
     
     CUSOLVER_CALL(cusolverDnSetStream(ws.solver, st));
     
@@ -139,5 +139,18 @@ namespace cuda_solvers{
                                         ws.work_bytes,
                                         &niter,
                                         dInfo));
+
+    int info_h = 0;
+    CUDA_CALL(cudaMemcpyAsync(&info_h,
+                              dInfo,
+                              sizeof(int),
+                              cudaMemcpyDeviceToHost,
+                              st));
+    
+    CUDA_CALL(cudaStreamSynchronize(st));
+    
+    if (info_h != 0) {
+      throw std::runtime_error("cuSOLVER gels failed: devInfo != 0");
+    }
   }
 }

@@ -55,7 +55,7 @@ TEST(GMRES, computeResidueReal) {
 
   Operator op{A, N};
 
-  detail::Workspace<real> work(N, 10);
+  detail::Workspace<thrust::device_vector, real> work(N, 10);
   detail::computeResidue(op, x, b, work, st);
 
   std::vector<real> expected(N, real(0));
@@ -123,7 +123,7 @@ TEST(GMRES, computeResidueComplex) {
 
   Operator op{A, N};
 
-  detail::Workspace<complex> work(N, 10);
+  detail::Workspace<thrust::device_vector, complex> work(N, 10);
   detail::computeResidue(op, x, b, work, st);
 
   std::vector<complex> expected(N, complex(0.0, 0.0));
@@ -185,7 +185,7 @@ TEST(GMRES, triangularizeGivensReal) {
   const int restart = 5;
   const real norm_b = real(2.1);
 
-  detail::Workspace<real> work(1, restart);
+  detail::Workspace<thrust::device_vector, real> work(1, restart);
 
   std::fill(work.hessenberg.begin(), work.hessenberg.end(), real(0));
   std::fill(work.cosGivens.begin(),  work.cosGivens.end(),  real(0));
@@ -260,7 +260,7 @@ TEST(GMRES, triangularizeGivensComplex) {
   const real norm_b = real(2.1);
   const real tol    = real(1e-12);
 
-  detail::Workspace<complex> work(1, restart);
+  detail::Workspace<thrust::device_vector, complex> work(1, restart);
 
   std::fill(work.hessenberg.begin(), work.hessenberg.end(), complex(0.0, 0.0));
   std::fill(work.cosGivens.begin(),  work.cosGivens.end(),  real(0));
@@ -405,7 +405,7 @@ TEST(GMRES, runArnoldiStepOrthonormalBase) {
   const int memory = 4;
   cudaStream_t st = 0;
 
-  detail::Workspace<real> work(N, memory);
+  detail::Workspace<thrust::device_vector,real> work(N, memory);
 
   auto& krylovBase = work.krylovBase;
   auto& H          = work.hessenberg;
@@ -493,7 +493,7 @@ TEST(GMRES, runArnoldiStepBreakdown) {
   const int memory = 3;
   cudaStream_t st = 0;
 
-  detail::Workspace<real> work(N, memory);
+  detail::Workspace<thrust::device_vector, real> work(N, memory);
 
   auto& krylovBase = work.krylovBase;
   auto& H          = work.hessenberg;
@@ -534,7 +534,7 @@ TEST(GMRES, runArnoldiStepOrthonormalBaseComplex) {
   const int memory = 4;
   cudaStream_t st = 0;
 
-  detail::Workspace<complex> work(N, memory);
+  detail::Workspace<thrust::device_vector, complex> work(N, memory);
 
   auto& krylovBase = work.krylovBase;
   auto& H          = work.hessenberg;
@@ -619,11 +619,11 @@ TEST(GMRES, runArnoldiStepOrthonormalBaseComplex) {
 }
 
 TEST(GMRES, runArnoldiStepBreakdownComplex) {
-  const int N = 4;
+  const int N      = 4;
   const int memory = 3;
-  cudaStream_t st = 0;
+  cudaStream_t st  = 0;
 
-  detail::Workspace<complex> work(N, memory);
+  detail::Workspace<thrust::device_vector, complex> work(N, memory);
 
   auto& krylovBase = work.krylovBase;
   auto& H          = work.hessenberg;

@@ -12,7 +12,7 @@ TEST(AAJ, updateMemoryVector_firstIteration) {
   const int N      = 3;
   const int memory = 2;
   const int iter   = 0;
-  detail::Workspace<complex> work(N, memory);
+  detail::Workspace<thrust::device_vector, complex> work(N, memory);
 
   work.x_old = {{1,1},{2,1},{-1,2}};
   work.x     = {{-0.5,-0.5},{-2,3},{1,-2}};
@@ -37,7 +37,7 @@ TEST(AAJ, updateMemoryVector_ArbitraryIteration) {
   const int N      = 4;
   const int memory = 3;
   const int iter   = 2;
-  detail::Workspace<complex> work(N, memory);
+  detail::Workspace<thrust::device_vector, complex> work(N, memory);
 
   work.x_old = {{1,1},{2,1}, {-1,2}, {-2,2}};
   work.x     = {{-0.5,-0.5}, {-2,3}, {1,-2}, {0.5,-2.5}};
@@ -63,7 +63,7 @@ TEST(AAJ, piccardIterationNoDamping) {
   const int N      = 4;
   const int memory = 3;
 
-  detail::Workspace<complex> work(N, memory);
+  detail::Workspace<thrust::device_vector, complex> work(N, memory);
 
   work.x_old = {{1,1}, {2,1}, {-1,2}, {-2,2}};
   work.f_old = {{-10.5,-0.15}, {-22,33}, {31,-23}, {-0.15,-5}};
@@ -84,7 +84,7 @@ TEST(AAJ, piccardIteration){
   cudaStream_t st  = 0;
   const int N      = 4;
   const int memory = 3;
-  detail::Workspace<complex> work(N, memory);
+  detail::Workspace<thrust::device_vector, complex> work(N, memory);
   work.x_old = {{1,1},{2,1}, {-1,2}, {-2,2}};
   work.f_old = {{-10.5,-0.15},{-22,33},{31,-23}, {-0.15,-5}};
 
@@ -104,7 +104,7 @@ TEST(AAJ, andersonStepExactResidualColumnReturnsOldX) {
   const int memory = 1;
   const int niter  = 0;
 
-  detail::Workspace<complex> work(N, memory);
+  detail::Workspace<thrust::device_vector, complex> work(N, memory);
   LSWorkspace lswork(N, memory);
 
   work.x_old = {{1,1}, {2,1}, {-1,2}, {-2,2}};
@@ -138,7 +138,7 @@ TEST(AAJ, andersonStepExactResidualColumnIncludesXDiffCorrection) {
   const int memory = 1;
   const int niter  = 0;
 
-  detail::Workspace<complex> work(N, memory);
+  detail::Workspace<thrust::device_vector, complex> work(N, memory);
   LSWorkspace lswork(N, memory);
 
   work.x_old = {{1,1}, {2,1}, {-1,2}, {-2,2}};

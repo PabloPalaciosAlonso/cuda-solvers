@@ -127,7 +127,7 @@ namespace cuda_solvers{
     return x.real();
   }
   
-  template<class T>
+  template<template<class...> class Vec, class T>
   inline T dotc(const Vec<T>& v1,
                 const Vec<T>& v2,
                 const cudaStream_t st = 0) {

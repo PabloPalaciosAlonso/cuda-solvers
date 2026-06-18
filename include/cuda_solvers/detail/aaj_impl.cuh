@@ -128,7 +128,7 @@ namespace cuda_solvers::aaj{
     //x_{k+1} = x_k + damping*f - (X + damping * F)*gammas
     template<template<class...> class Vec>
     inline  void performAndersonStep(Workspace<Vec, complex>& work,
-                                     LSWorkspace& lswork,
+                                     LSWorkspace<Vec>& lswork,
                                      real damping,
                                      int niter,
                                      cudaStream_t &st){
@@ -181,7 +181,7 @@ namespace cuda_solvers::aaj{
     
     template<template<class...> class Vec>
     inline void performNextStep(Workspace<Vec, complex>& work,
-                                LSWorkspace& lswork,
+                                LSWorkspace<Vec>& lswork,
                                 const Parameters &params,
                                 int niter,
                                 cudaStream_t &st){
@@ -259,7 +259,7 @@ namespace cuda_solvers::aaj{
     int currentNiter = 0;
     real error       = params.tolerance + 1;
     
-    LSWorkspace lswork(N, memory);
+    LSWorkspace<Vec> lswork(N, memory);
     detail::Workspace<Vec, T> work(N, memory);
     
     auto& x      = work.x;

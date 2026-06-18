@@ -105,7 +105,7 @@ TEST(AAJ, andersonStepExactResidualColumnReturnsOldX) {
   const int niter  = 0;
 
   detail::Workspace<thrust::device_vector, complex> work(N, memory);
-  LSWorkspace lswork(N, memory);
+  LSWorkspace<thrust::device_vector> lswork(N, memory);
 
   work.x_old = {{1,1}, {2,1}, {-1,2}, {-2,2}};
   work.f_old = {{0.5,-0.25}, {-1,2}, {3,-1}, {-0.5,0.75}};
@@ -139,8 +139,8 @@ TEST(AAJ, andersonStepExactResidualColumnIncludesXDiffCorrection) {
   const int niter  = 0;
 
   detail::Workspace<thrust::device_vector, complex> work(N, memory);
-  LSWorkspace lswork(N, memory);
-
+  LSWorkspace<thrust::device_vector> lswork(N, memory);
+  
   work.x_old = {{1,1}, {2,1}, {-1,2}, {-2,2}};
   work.f_old = {{0.5,-0.25}, {-1,2}, {3,-1}, {-0.5,0.75}};
 

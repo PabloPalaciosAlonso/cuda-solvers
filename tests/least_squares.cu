@@ -36,7 +36,7 @@ TEST(LeastSquares, identitySquareSystem) {
     A[index2D(i, i, rows)] = complex(1, 0);
   }
 
-  LSWorkspace ws(rows, cols);
+  LSWorkspace<thrust::device_vector> ws(rows, cols);
 
   solve_least_squares(A, b, x, ws, st);
   cudaStreamSynchronize(st);
@@ -79,7 +79,7 @@ TEST(LeastSquares, overdeterminedExactSystem) {
       complex(A[index2D(i, 1, rows)]) * x1;
   }
 
-  LSWorkspace ws(rows, cols);
+  LSWorkspace<thrust::device_vector> ws(rows, cols);
 
   solve_least_squares(A, b, x, ws, st);
   cudaStreamSynchronize(st);
@@ -104,7 +104,7 @@ TEST(LeastSquares, overdeterminedOneColumnMeanSolution) {
 
   thrust::device_vector<complex> x(cols, complex(0, 0));
 
-  LSWorkspace ws(rows, cols);
+  LSWorkspace<thrust::device_vector> ws(rows, cols);
 
   solve_least_squares(A, b, x, ws, st);
   cudaStreamSynchronize(st);
@@ -144,7 +144,7 @@ TEST(LeastSquares, doesNotModifyInputAOrB) {
   thrust::device_vector<complex> A_before = A;
   thrust::device_vector<complex> b_before = b;
 
-  LSWorkspace ws(rows, cols);
+  LSWorkspace<thrust::device_vector> ws(rows, cols);
 
   solve_least_squares(A, b, x, ws, st);
   cudaStreamSynchronize(st);
@@ -172,7 +172,7 @@ TEST(LeastSquares, devInfoIsZeroForValidProblem) {
   };
   thrust::device_vector<complex> x(cols, complex(0, 0));
 
-  LSWorkspace ws(rows, cols);
+  LSWorkspace<thrust::device_vector> ws(rows, cols);
 
   solve_least_squares(A, b, x, ws, st);
   cudaStreamSynchronize(st);

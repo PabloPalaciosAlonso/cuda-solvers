@@ -33,7 +33,7 @@ namespace cuda_solvers{
 #define cusolverDnComplexgels_bufferSize cusolverDnCCgels_bufferSize
 #endif
 
-  template<class...> class Vec>
+  template<template<class...> class Vec>
   struct LSWorkspace {
     cusolverDnHandle_t solver = nullptr;
 
@@ -84,12 +84,12 @@ namespace cuda_solvers{
   };
 
 
-  template<class...> class Vec>
+  template<template<class...> class Vec>
   inline void solve_least_squares(Vec<complex>& A,
                                   Vec<complex>& b,
                                   Vec<complex>& out,
-                                  LSWorkspace& ws,
-                                  const cudaStream_t& st){
+                                  LSWorkspace<Vec>& ws,
+                                  cudaStream_t st){
     const int rows = ws.rows;
     const int cols = ws.cols;
     

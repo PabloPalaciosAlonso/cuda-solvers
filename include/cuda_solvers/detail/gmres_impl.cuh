@@ -8,16 +8,16 @@ namespace cuda_solvers::gmres{
   
   namespace detail{
 
-    template<class T>
+    template<template<class...> class Vec, class T>
     struct Workspace {
-      thrust::device_vector<T> krylovBase;
-      thrust::device_vector<T> residue;
-      thrust::device_vector<T> Ax;
-      thrust::device_vector<T> v0;
-      thrust::device_vector<T> vi;
-      thrust::device_vector<T> vj;
-      thrust::device_vector<T> vk;
-      thrust::device_vector<T> w;
+      Vec<T> krylovBase;
+      Vec<T> residue;
+      Vec<T> Ax;
+      Vec<T> v0;
+      Vec<T> vi;
+      Vec<T> vj;
+      Vec<T> vk;
+      Vec<T> w;
 
       std::vector<T> hessenberg;
       std::vector<real> cosGivens;
@@ -48,11 +48,11 @@ namespace cuda_solvers::gmres{
 
     
     // Given the equation Ax = b; computes b-Ax for a given x; op(x,st) \def Ax 
-    template<class Operator, class T>
+    template<class Operator, template<class...> class Vec, class T>
     void computeResidue(const Operator& op,
-                        const thrust::device_vector<T>& x,
-                        const thrust::device_vector<T>& b,
-                        Workspace<T>& work,
+                        const Vec<T>& x,
+                        const Vec<T>& b,
+                        Workspace<Vec, T>& work,
                         const cudaStream_t st){
 
       assert(work.N == b.size());
@@ -60,9 +60,9 @@ namespace cuda_solvers::gmres{
       substract(b, work.Ax, work.residue, st);
     }
     
-    template<class Operator, class T>
+    template<class Operator, template<class...> class Vec, class T>
     bool runArnoldiStep(const Operator& op,
-                        Workspace<T> &work, int j,
+                        Workspace<Vec, T> &work, int j,
                         cudaStream_t st) {
       
       auto& vi         = work.vi;
@@ -175,7 +175,8 @@ namespace cuda_solvers::gmres{
       return {c, s};
     }
 
-    inline real triangularizeGivens(Workspace<real>& work,
+    template<template<class...> class Vec>
+    inline real triangularizeGivens(Workspace<Vec, real>& work,
                                     const int j,
                                     const real norm_b) {
       
@@ -213,8 +214,9 @@ namespace cuda_solvers::gmres{
       
       return std::abs(g[j + 1]) / norm_b;
     }
-    
-    inline real triangularizeGivens(Workspace<complex>& work,
+
+    template<template<class...> class Vec>
+    inline real triangularizeGivens(Workspace<Vec, complex>& work,
                                     const int j,
                                     const real norm_b) {
       
@@ -258,18 +260,18 @@ namespace cuda_solvers::gmres{
   }
   
   // Solves op(x, st) = b; with op(x,st) \def A*x being A a matrix
-  template<class Operator, class T>
-  Result<T> solve(const Operator& op,
-                  const thrust::device_vector<T>& b,
-                  const thrust::device_vector<T>& initialGuess,
-                  const Parameters& params,
-                  cudaStream_t st) {
+  template<class Operator,template<class...> class Vec, class T>
+  Result<Vec, T> solve(const Operator& op,
+                       const Vec<T>& b,
+                       const Vec<T>& initialGuess,
+                       const Parameters& params,
+                       cudaStream_t st) {
     
     const int N = b.size();
     assert(initialGuess.size() == b.size());
     assert(params.memory > 0);
     
-    Result<T> result{initialGuess, {}};
+    Result<Vec, T> result{initialGuess, {}};
     auto& x    = result.x;
     auto& info = result.info;
     
@@ -278,12 +280,12 @@ namespace cuda_solvers::gmres{
     const real norm_b = norm(b, st);
 
     if (norm_b == real(0)) {
-      x    = thrust::device_vector<T>(N, T());
+      x    = Vec<T>(N, T());
       info = writeInfo(true, 0,0.0);
       return result;
     }
     
-    detail::Workspace<T> work(N, restart);
+    detail::Workspace<Vec, T> work(N, restart);
     int total_iters = 0;
     
     for (int outer = 0; outer < params.maxIterations; ++outer) {

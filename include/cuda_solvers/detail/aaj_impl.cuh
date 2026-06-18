@@ -1,5 +1,6 @@
 #pragma once
 #include <thrust/execution_policy.h>
+#include <thrust/copy.h>
 #include "cuda_solvers/types.h"
 #include "cuda_solvers/gmres.h"
 #include "cuda_solvers/detail/vector_operations.cuh"
@@ -11,19 +12,19 @@ namespace cuda_solvers::aaj{
 
   namespace detail{
 
-    template<class T>
+    template<template<class...> class Vec, class T>
     struct Workspace {
-
-      thrust::device_vector<T> x;
-      thrust::device_vector<T> x_old;
-      thrust::device_vector<T> x_pred;
-      thrust::device_vector<T> x_diff;      
-      thrust::device_vector<T> X_diff;
-      thrust::device_vector<T> f;
-      thrust::device_vector<T> f_old;
-      thrust::device_vector<T> f_diff;
-      thrust::device_vector<T> F_diff;
-      thrust::device_vector<T> gammas;
+      
+      Vec<T> x;
+      Vec<T> x_old;
+      Vec<T> x_pred;
+      Vec<T> x_diff;      
+      Vec<T> X_diff;
+      Vec<T> f;
+      Vec<T> f_old;
+      Vec<T> f_diff;
+      Vec<T> F_diff;
+      Vec<T> gammas;
       
       int N;
       int memory;
@@ -45,12 +46,13 @@ namespace cuda_solvers::aaj{
         thrust::fill(F_diff.begin(), F_diff.end(), T());
       }        
     };
-    
-    inline  void updateMemoryVectors(Workspace<complex>& work,
-                                     int iteration,
-                                     const cudaStream_t &st){
-      
 
+    template<template<class...> class Vec>
+    inline  void updateMemoryVectors(Workspace<Vec, complex>& work,
+                                     int iteration,
+                                     const cudaStream_t st){
+      
+      
       int memory = work.memory;
       int N      = work.N;
 
@@ -73,8 +75,8 @@ namespace cuda_solvers::aaj{
       writeColumn(x_diff, X_diff, N, column, st);
     }
     
-    
-    inline  real computeRelativeError(Workspace<complex>& work,
+    template<template<class...> class Vec>
+    inline  real computeRelativeError(Workspace<Vec, complex>& work,
                                       cudaStream_t st) {
       
       substract(work.x_pred, work.x, work.x_diff, st);
@@ -84,7 +86,7 @@ namespace cuda_solvers::aaj{
     }
     
     static __global__ void updateSolutionAnderson_D(complex* X_diff, complex* F_diff,
-                                                    complex* x_old, complex* f_old,
+                                                    complex* x_old,  complex* f_old,
                                                     complex* gammas, complex* x,
                                                     complex damping, int memory,
                                                     int dim){
@@ -97,7 +99,7 @@ namespace cuda_solvers::aaj{
       }
       x[i] = x_new_i;
     }
-
+    
     struct PicardStepFunctor {
       real damping;
       
@@ -111,7 +113,8 @@ namespace cuda_solvers::aaj{
     };
 
     // x_{k+1} = x_k + damping * f_k
-    inline void performPiccardStep(Workspace<complex>& work,
+    template<template<class...> class Vec>
+    inline void performPiccardStep(Workspace<Vec, complex>& work,
                                    real damping,
                                    cudaStream_t& st) {
       thrust::transform(thrust::cuda::par.on(st),
@@ -123,7 +126,8 @@ namespace cuda_solvers::aaj{
     
     
     //x_{k+1} = x_k + damping*f - (X + damping * F)*gammas
-    inline  void performAndersonStep(Workspace<complex>& work,
+    template<template<class...> class Vec>
+    inline  void performAndersonStep(Workspace<Vec, complex>& work,
                                      LSWorkspace& lswork,
                                      real damping,
                                      int niter,
@@ -175,8 +179,8 @@ namespace cuda_solvers::aaj{
                                                                         rows);
     }
     
-    
-    inline void performNextStep(Workspace<complex>& work,
+    template<template<class...> class Vec>
+    inline void performNextStep(Workspace<Vec, complex>& work,
                                 LSWorkspace& lswork,
                                 const Parameters &params,
                                 int niter,
@@ -213,8 +217,9 @@ namespace cuda_solvers::aaj{
   //       System::log<System::MESSAGE>("[AAJ] Current relative error: %f", error);
   //   }
   // }
-  
-    inline void updateErrorAndLogging(Workspace<complex>& work,
+
+    template<template<class...> class Vec>
+    inline void updateErrorAndLogging(Workspace<Vec, complex>& work,
                                       real& error,
                                       const Parameters& params,
                                       int currentIter,
@@ -239,26 +244,24 @@ namespace cuda_solvers::aaj{
   }
 
   //Solves op(x)=x
-  template <class Operator, class T>
-  Result<T> solve(const Operator &op,
-                  const thrust::device_vector<T> &initialGuess,
-                  const Parameters &params,
-                  cudaStream_t st){
+  template<class Operator,template<class...> class Vec, class T>
+  Result<Vec, T> solve(const Operator &op,
+                       const Vec<T> &initialGuess,
+                       const Parameters &params,
+                       cudaStream_t st){
     
     real tolerance    = params.tolerance;
-    real damping_0    = params.damping;
     int memory        = params.memory;
     int maxIterations = params.maxIterations;
     int N             = initialGuess.size();
     
-    
     int totalNiter   = 0;
     int currentNiter = 0;
     real error       = params.tolerance + 1;
-        
+    
     LSWorkspace lswork(N, memory);
-    detail::Workspace<T> work(N, memory);
-
+    detail::Workspace<Vec, T> work(N, memory);
+    
     auto& x      = work.x;
     auto& x_old  = work.x_old;
     auto& x_pred = work.x_pred;
@@ -267,8 +270,11 @@ namespace cuda_solvers::aaj{
     auto& X_diff = work.X_diff;
     auto& F_diff = work.F_diff;
     
-       
-    x_old = initialGuess;
+    thrust::copy(thrust::cuda::par.on(st),
+                 initialGuess.begin(),
+                 initialGuess.end(),
+                 x_old.begin());
+    
     op(x_old, x, st);
     substract(x, x_old, f_old, st);
     op(x, x_pred, st);    
@@ -294,8 +300,8 @@ namespace cuda_solvers::aaj{
     // params.employedIterations = totalNiter;
     // params.finalError         = error;
     // params.damping            = damping_0;
-
-    Result<T> result{x, {}};
+    
+    Result<Vec, T> result{x, {}};
     return result;
   }
 }

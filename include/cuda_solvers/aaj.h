@@ -13,11 +13,11 @@ namespace cuda_solvers::aaj{
     int notAcceleratedInterval;
   };
 
-  template<class Operator, class T>
-  Result<T> solve(const Operator& op,
-                  const thrust::device_vector<T>& initialGuess,
-                  const Parameters& params,
-                  cudaStream_t st);
+  template<class Operator,template<class...> class Vec, class T>
+  Result<Vec, T> solve(const Operator& op,
+                       const Vec<T>& initialGuess,
+                       const Parameters& params,
+                       cudaStream_t st);
 }
 
 #include "cuda_solvers/detail/aaj_impl.cuh"

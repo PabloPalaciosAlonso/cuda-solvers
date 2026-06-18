@@ -1,6 +1,5 @@
 #pragma once
 #include<thrust/complex.h>
-#include<thrust/device_vector.h>
 
 namespace cuda_solvers{
 
@@ -19,9 +18,9 @@ namespace cuda_solvers{
     real relativeError = 0.0;
   };
 
-  template<class T>
+  template<template<class...> class Vec, class T>
   struct Result{
-    thrust::device_vector<T> x;
+    Vec<T> x;
     OutputInfo info;
   };
 }

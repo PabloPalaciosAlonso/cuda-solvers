@@ -32,14 +32,15 @@ namespace cuda_solvers{
 #define cusolverDnComplexgels cusolverDnCCgels
 #define cusolverDnComplexgels_bufferSize cusolverDnCCgels_bufferSize
 #endif
-  
+
+  template<class...> class Vec>
   struct LSWorkspace {
     cusolverDnHandle_t solver = nullptr;
 
-    thrust::device_vector<complex> A_tmp;
-    thrust::device_vector<complex> b_tmp;
-    thrust::device_vector<unsigned char> work;
-    thrust::device_vector<int> info;
+    Vec<complex> A_tmp;
+    Vec<complex> b_tmp;
+    Vec<unsigned char> work;
+    Vec<int> info;
 
     int rows = 0;
     int cols = 0;
@@ -81,10 +82,12 @@ namespace cuda_solvers{
     LSWorkspace(const LSWorkspace&) = delete;
     LSWorkspace& operator=(const LSWorkspace&) = delete;
   };
-  
-  inline void solve_least_squares(thrust::device_vector<complex>& A,
-                                  thrust::device_vector<complex>& b,
-                                  thrust::device_vector<complex>& out,
+
+
+  template<class...> class Vec>
+  inline void solve_least_squares(Vec<complex>& A,
+                                  Vec<complex>& b,
+                                  Vec<complex>& out,
                                   LSWorkspace& ws,
                                   const cudaStream_t& st){
     const int rows = ws.rows;

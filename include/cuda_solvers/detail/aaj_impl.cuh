@@ -83,11 +83,11 @@ namespace cuda_solvers::aaj{
       return diff_norm/x_norm;
     }
     
-    __global__ void updateSolutionAnderson_D(complex* X_diff, complex* F_diff,
-                                             complex* x_old, complex* f_old,
-                                             complex* gammas, complex* x,
-                                             complex damping, int memory,
-                                             int dim){
+    static __global__ void updateSolutionAnderson_D(complex* X_diff, complex* F_diff,
+                                                    complex* x_old, complex* f_old,
+                                                    complex* gammas, complex* x,
+                                                    complex damping, int memory,
+                                                    int dim){
       
       int i = blockIdx.x * blockDim.x + threadIdx.x;
       if (i >= dim) return;

@@ -17,9 +17,9 @@ namespace cuda_solvers{
     return i + nrows * j;
   }
   
-  template <class T>
-  inline void getColumn(const thrust::device_vector<T>& matrix,
-                        thrust::device_vector<T>& out,
+  template <template<class...> class Vec, class T>
+  inline void getColumn(const Vec<T>& matrix,
+                        Vec<T>& out,
                         const int col,
                         const cudaStream_t st) {
     
@@ -30,9 +30,9 @@ namespace cuda_solvers{
                  out.begin());
   }
   
-  template <class T>
-  inline void writeColumn(const thrust::device_vector<T>& v,
-                          thrust::device_vector<T>& V,
+  template <template<class...> class Vec, class T>
+  inline void writeColumn(const Vec<T>& v,
+                          Vec<T>& V,
                           const int N,
                           const int col,
                           const cudaStream_t st) {

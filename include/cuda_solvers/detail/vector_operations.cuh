@@ -10,10 +10,10 @@
 
 namespace cuda_solvers{
 
-  template<class T>
-  inline void substract(const thrust::device_vector<T>& v1,
-                        const thrust::device_vector<T>& v2,
-                        thrust::device_vector<T>& out,
+  template<template<class...> class Vec, class T>
+  inline void substract(const Vec<T>& v1,
+                        const Vec<T>& v2,
+                        Vec<T>& out,
                         cudaStream_t st = 0) {
     
     assert(v1.size() == v2.size());
@@ -27,10 +27,10 @@ namespace cuda_solvers{
                       thrust::minus<T>());
   }
 
-  template<class T>
-  inline void add(const thrust::device_vector<T>& v1,
-                  const thrust::device_vector<T>& v2,
-                  thrust::device_vector<T>& out,
+  template<template<class...> class Vec, class T>
+  inline void add(const Vec<T>& v1,
+                  const Vec<T>& v2,
+                  Vec<T>& out,
                   cudaStream_t st = 0) {
     
     assert(v1.size() == v2.size());
@@ -44,10 +44,10 @@ namespace cuda_solvers{
                       thrust::plus<T>());
   }
 
-  template<class T>
-  inline void multiply(const thrust::device_vector<T>& v1,
-                       const thrust::device_vector<T>& v2,
-                       thrust::device_vector<T>& out,
+  template<template<class...> class Vec, class T>
+  inline void multiply(const Vec<T>& v1,
+                       const Vec<T>& v2,
+                       Vec<T>& out,
                        cudaStream_t st = 0) {
 
     assert(v1.size() == v2.size());
@@ -61,10 +61,10 @@ namespace cuda_solvers{
                       thrust::multiplies<T>());
   }
 
-  template<class T>
-  inline void multiply(const thrust::device_vector<T>& v,
+  template<template<class...> class Vec, class T>
+  inline void multiply(const Vec<T>& v,
                        const T scalar,
-                       thrust::device_vector<T>& out,
+                       Vec<T>& out,
                        const cudaStream_t st = 0) {
 
     auto policy = thrust::cuda::par.on(st);
@@ -77,10 +77,10 @@ namespace cuda_solvers{
                       thrust::multiplies<T>());
   }
 
-  template<class T>
-  inline void divide(const thrust::device_vector<T>& v1,
-                     const thrust::device_vector<T>& v2,
-                     thrust::device_vector<T>& out,
+  template<template<class...> class Vec, class T>
+  inline void divide(const Vec<T>& v1,
+                     const Vec<T>& v2,
+                     Vec<T>& out,
                      const cudaStream_t st = 0) {
   
     assert(v1.size() == v2.size());
@@ -94,10 +94,10 @@ namespace cuda_solvers{
                       thrust::divides<T>());
   }
 
-  template<class T>
-  inline void divide(const thrust::device_vector<T>& v,
+  template<template<class...> class Vec, class T>
+  inline void divide(const Vec<T>& v,
                      const T scalar,
-                     thrust::device_vector<T>& out,
+                     Vec<T>& out,
                      const cudaStream_t st = 0) {
     multiply(v, T(1.0)/scalar, out, st);
   }
@@ -128,8 +128,8 @@ namespace cuda_solvers{
   }
   
   template<class T>
-  inline T dotc(const thrust::device_vector<T>& v1,
-                const thrust::device_vector<T>& v2,
+  inline T dotc(const Vec<T>& v1,
+                const Vec<T>& v2,
                 const cudaStream_t st = 0) {
     
     assert(v1.size() == v2.size());
@@ -142,8 +142,8 @@ namespace cuda_solvers{
                                  dotProductFunctor<T>());
   }
 
-  template <class T>
-  inline real norm(const thrust::device_vector<T> &vec, const cudaStream_t st = 0)
+  template <template<class...> class Vec, class T>
+  inline real norm(const Vec<T> &vec, const cudaStream_t st = 0)
   {
     T norm2 = dotc(vec, vec, st);
     return std::sqrt(make_real(norm2));
@@ -159,10 +159,10 @@ namespace cuda_solvers{
     }
   };
   
-  template<class T>
-  void axpy(const thrust::device_vector<T>& x,
-            const thrust::device_vector<T>& y,
-            thrust::device_vector<T>& out,
+  template<template<class...> class Vec, class T>
+  void axpy(const Vec<T>& x,
+            const Vec<T>& y,
+            Vec<T>& out,
             const T alpha,
             const cudaStream_t st = 0) {
     assert(x.size() == y.size());

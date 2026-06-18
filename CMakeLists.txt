@@ -1,4 +1,4 @@
-ºcmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.22)
 
 if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
   set(CMAKE_CUDA_ARCHITECTURES native)

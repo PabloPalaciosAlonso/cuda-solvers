@@ -9,6 +9,7 @@ namespace cuda_solvers::gmres{
     int  maxIterations = 300;
     int  memory        = 30;
     real tolerance     = real(1e-6);
+    bool verbose       = true;
   };
   
   template<class Operator,template<class...> class Vec, class T>

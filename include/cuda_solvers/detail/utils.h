@@ -1,17 +1,31 @@
 #pragma once
 #include <thrust/execution_policy.h>
 #include "cuda_solvers/types.h"
-
+#include "cuda_solvers/detail/logger.h"
 
 namespace cuda_solvers{
-  inline  OutputInfo writeInfo(bool converged, int requiredIterations, real relativeError){
+  inline  OutputInfo writeInfo(bool converged, int requiredIterations,
+                               real relativeError, bool verbose,
+                               std::string method){
     OutputInfo info;
     info.converged          = converged;
     info.requiredIterations = requiredIterations;
     info.relativeError      = relativeError;
+
+    if (verbose) {
+      if (converged) {
+        LOG_INFO("[" << method << "] successfully converged");
+        LOG_INFO("[" << method << "] relative error: " << relativeError);
+        LOG_INFO("[" << method << "] required iterations: " << requiredIterations);
+      } else {
+        LOG_WARN("[" << method << "] did not converge");
+        LOG_WARN("[" << method << "] relative error: " << relativeError);
+        LOG_WARN("[" << method << "] number of iterations: " << requiredIterations);
+      }
+    }
     return info;
   }
-
+  
   
   inline int index2D(int i, int j, int nrows) {
     return i + nrows * j;

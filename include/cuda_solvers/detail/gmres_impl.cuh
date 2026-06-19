@@ -3,6 +3,7 @@
 #include "cuda_solvers/gmres.h"
 #include "cuda_solvers/detail/vector_operations.cuh"
 #include "cuda_solvers/detail/utils.h"
+#include "cuda_solvers/detail/logger.h"
 
 namespace cuda_solvers::gmres{
   
@@ -281,7 +282,7 @@ namespace cuda_solvers::gmres{
 
     if (norm_b == real(0)) {
       x    = Vec<T>(N, T());
-      info = writeInfo(true, 0,0.0);
+      info = writeInfo(true, 0,0.0, params.verbose, "GMRES");
       return result;
     }
     
@@ -294,11 +295,12 @@ namespace cuda_solvers::gmres{
       real beta                 = norm(work.residue, st);
       real relres               = beta / norm_b;
 
-      // uammd::System::log<uammd::System::MESSAGE>("[GMRES] Current step: %i ",outer * restart);
-      // uammd::System::log<uammd::System::MESSAGE>("[GMRES] Current relative error: %f", relres);
-      
+      if (params.verbose){
+        LOG_INFO("[GMRES] Current step: " << outer * restart);
+        LOG_INFO("[GMRES] Current relative error: " << relres);
+      }
       if (relres < tol) {
-        info = writeInfo(true, outer * restart, relres);
+        info = writeInfo(true, outer * restart, relres, params.verbose, "GMRES");
         return result;
       }
       
@@ -347,7 +349,7 @@ namespace cuda_solvers::gmres{
       relres   = beta / norm_b;
       
       if (relres < tol) {
-        info = writeInfo(true, total_iters, relres);
+        info = writeInfo(true, total_iters, relres, params.verbose, "GMRES");
         return result;
       }     
     }
@@ -356,7 +358,7 @@ namespace cuda_solvers::gmres{
     const real beta           = norm(work.residue, st);
     const real relres         = beta / norm_b;
     
-    info = writeInfo(false, total_iters, relres);
+    info = writeInfo(false, total_iters, relres, params.verbose, "GMRES");
     return result;
   } 
 }

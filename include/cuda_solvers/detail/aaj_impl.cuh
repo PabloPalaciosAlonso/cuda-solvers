@@ -6,6 +6,7 @@
 #include "cuda_solvers/detail/vector_operations.cuh"
 #include "cuda_solvers/detail/least_squares.cuh"
 #include "cuda_solvers/detail/utils.h"
+#include "cuda_solvers/detail/logger.h"
 
 
 namespace cuda_solvers::aaj{
@@ -182,7 +183,7 @@ namespace cuda_solvers::aaj{
     template<template<class...> class Vec>
     inline void performNextStep(Workspace<Vec, complex>& work,
                                 LSWorkspace<Vec>& lswork,
-                                const Parameters &params,
+                                Parameters &params,
                                 int niter,
                                 cudaStream_t &st){
       
@@ -197,31 +198,31 @@ namespace cuda_solvers::aaj{
     }
     
     inline void handleErrorAndUpdate(real &error, const real &newerror,
-                                     const Parameters& aaj) {
+                                     Parameters& aaj) {
     
     static int iterationsIncreasingError = 0;
     if (newerror > error || std::isnan(newerror) || std::isinf(newerror)) {
       iterationsIncreasingError++;
-      // if (iterationsIncreasingError == 5) {
-      //   System::log<System::MESSAGE>("[AAJ] Anderson acceleration is not converging, trying to use a smaller damping");
-      //   iterationsIncreasingError = 0;
-      //   aaj.damping = aaj.damping*0.75;
-      // }
+      if (iterationsIncreasingError == 5) {
+        LOG_WARN("[AAJ] Anderson acceleration is not converging, trying to use a smaller damping");
+        iterationsIncreasingError = 0;
+        aaj.damping = aaj.damping*0.75;
+      }
     }
     error = newerror;
     }
-
-  // inline  void printInfo(int printSteps, int niter, float error){
-  //   if (niter%(printSteps) == 0 and niter > 0){
-  //       System::log<System::MESSAGE>("[AAJ] Current step: %i ",niter);
-  //       System::log<System::MESSAGE>("[AAJ] Current relative error: %f", error);
-  //   }
-  // }
+    
+    inline  void printInfo(int printSteps, int niter, float error, bool verbose){
+      if (niter%(printSteps) == 0 and niter > 0 and verbose){
+        LOG_INFO("[AAJ] Current step: "<<niter);
+        LOG_INFO("[AAJ] Current relative error: "<< error);
+      }
+    }
 
     template<template<class...> class Vec>
     inline void updateErrorAndLogging(Workspace<Vec, complex>& work,
                                       real& error,
-                                      const Parameters& params,
+                                      Parameters& params,
                                       int currentIter,
                                       int totalIter, cudaStream_t st){
       
@@ -230,10 +231,9 @@ namespace cuda_solvers::aaj{
       real newerror = computeRelativeError(work, st);
       handleErrorAndUpdate(error, newerror, params);
     }
-    
-    //printInfo(params.printSteps, totalIter, error);
+      printInfo(params.memory, totalIter, error, params.verbose);
     }
-   
+    
   // inline void printIterationOutcome(const real error, const real tolerance, int niter) {
   //   if (error > tolerance) {
   //     System::log<System::ERROR>("[AAJ] Iteration has reached the maximum number of steps without reaching the convergence.");
@@ -247,7 +247,7 @@ namespace cuda_solvers::aaj{
   template<class Operator,template<class...> class Vec, class T>
   Result<Vec, T> solve(const Operator &op,
                        const Vec<T> &initialGuess,
-                       const Parameters &params,
+                       Parameters &params,
                        cudaStream_t st){
     
     real tolerance    = params.tolerance;

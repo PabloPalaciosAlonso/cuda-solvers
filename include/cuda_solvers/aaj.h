@@ -11,6 +11,7 @@ namespace cuda_solvers::aaj{
     real tolerance;
     real damping;
     int notAcceleratedInterval;
+    bool verbose = true;
   };
 
   template<class Operator,template<class...> class Vec, class T>

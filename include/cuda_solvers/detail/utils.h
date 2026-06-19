@@ -14,13 +14,13 @@ namespace cuda_solvers{
 
     if (verbose) {
       if (converged) {
-        LOG_INFO("[" << method << "] successfully converged");
-        LOG_INFO("[" << method << "] relative error: " << relativeError);
-        LOG_INFO("[" << method << "] required iterations: " << requiredIterations);
+        LOG_INFO("[" << method << "] Successfully converged");
+        LOG_INFO("[" << method << "] Relative error: " << relativeError);
+        LOG_INFO("[" << method << "] Required iterations: " << requiredIterations);
       } else {
-        LOG_WARN("[" << method << "] did not converge");
-        LOG_WARN("[" << method << "] relative error: " << relativeError);
-        LOG_WARN("[" << method << "] number of iterations: " << requiredIterations);
+        LOG_WARN("[" << method << "] Did not converge");
+        LOG_WARN("[" << method << "] Relative error: " << relativeError);
+        LOG_WARN("[" << method << "] Number of iterations: " << requiredIterations);
       }
     }
     return info;

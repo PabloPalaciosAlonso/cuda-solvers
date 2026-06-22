@@ -13,12 +13,12 @@ namespace cuda_solvers::aaj{
 
   namespace detail{
 
-    void setDefaultMemory(Parameters& p, int N){
+    inline void setDefaultMemory(Parameters& p, int N){
       if (p.memory <= 0) {
         p.memory = std::min(3 * N / 2 + 1, 30);
       }
     }
-
+    
     template<template<class...> class Vec, class T>
     struct Workspace {
       

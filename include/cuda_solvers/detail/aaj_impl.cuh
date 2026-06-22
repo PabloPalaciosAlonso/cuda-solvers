@@ -13,6 +13,12 @@ namespace cuda_solvers::aaj{
 
   namespace detail{
 
+    void setDefaultMemory(Parameters& p, int N){
+      if (p.memory <= 0) {
+        p.memory = std::min(3 * N / 2 + 1, 30);
+      }
+    }
+
     template<template<class...> class Vec, class T>
     struct Workspace {
       
@@ -250,10 +256,12 @@ namespace cuda_solvers::aaj{
                        Parameters &params,
                        cudaStream_t st){
     
+    int N             = initialGuess.size();
+    detail::setDefaultMemory(params, N);
     real tolerance    = params.tolerance;
     int memory        = params.memory;
     int maxIterations = params.maxIterations;
-    int N             = initialGuess.size();
+    
     
     int totalNiter   = 0;
     int currentNiter = 0;

@@ -6,12 +6,12 @@
 namespace cuda_solvers::aaj{
 
   struct Parameters {
-    int maxIterations;
-    int memory;
-    real tolerance;
-    real damping;
-    int notAcceleratedInterval;
-    bool verbose = true;
+    int maxIterations          = 5000;
+    int memory                 = -1;
+    real tolerance             = 1e-4;
+    real damping               = 1e-5;
+    int notAcceleratedInterval = 2;
+    bool verbose               = true;
   };
 
   template<class Operator,template<class...> class Vec, class T>

@@ -15,7 +15,7 @@ namespace cuda_solvers::aaj{
 
     inline void setDefaultMemory(Parameters& p, int N){
       if (p.memory <= 0) {
-        p.memory = std::min(3 * N / 2 + 1, 30);
+        p.memory = std::min(N / 2 + 1, 30);
       }
     }
     

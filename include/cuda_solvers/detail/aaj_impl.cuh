@@ -13,10 +13,12 @@ namespace cuda_solvers::aaj{
 
   namespace detail{
 
-    inline void setDefaultMemory(Parameters& p, int N){
+    inline Paraemters setDefaultMemory(const Parameters& p_in, int N){
+      Parameters p = p_in;
       if (p.memory <= 0) {
         p.memory = std::min(N / 2 + 1, 30);
       }
+      return p;
     }
     
     template<template<class...> class Vec, class T>
@@ -189,7 +191,7 @@ namespace cuda_solvers::aaj{
     template<template<class...> class Vec>
     inline void performNextStep(Workspace<Vec, complex>& work,
                                 LSWorkspace<Vec>& lswork,
-                                Parameters &params,
+                                const Parameters &params,
                                 int niter,
                                 cudaStream_t &st){
       
@@ -204,8 +206,8 @@ namespace cuda_solvers::aaj{
     }
     
     inline void handleErrorAndUpdate(real &error, const real &newerror,
-                                     Parameters& aaj) {
-    
+                                     const Parameters& aaj) {
+      
     static int iterationsIncreasingError = 0;
     if (newerror > error || std::isnan(newerror) || std::isinf(newerror)) {
       iterationsIncreasingError++;
@@ -228,7 +230,7 @@ namespace cuda_solvers::aaj{
     template<template<class...> class Vec>
     inline void updateErrorAndLogging(Workspace<Vec, complex>& work,
                                       real& error,
-                                      Parameters& params,
+                                      const Parameters& params,
                                       int currentIter,
                                       int totalIter, cudaStream_t st){
       
@@ -253,11 +255,11 @@ namespace cuda_solvers::aaj{
   template<class Operator,template<class...> class Vec, class T>
   Result<Vec, T> solve(const Operator &op,
                        const Vec<T> &initialGuess,
-                       const Parameters &params,
+                       const Parameters &params_in,
                        cudaStream_t st){
     
     int N             = initialGuess.size();
-    detail::setDefaultMemory(params, N);
+    Parameters params = detail::setDefaultMemory(params_in, N);
     real tolerance    = params.tolerance;
     int memory        = params.memory;
     int maxIterations = params.maxIterations;

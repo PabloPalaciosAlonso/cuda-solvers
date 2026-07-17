@@ -13,7 +13,7 @@ namespace cuda_solvers::aaj{
 
   namespace detail{
 
-    inline Paraemters setDefaultMemory(const Parameters& p_in, int N){
+    inline Parameters setDefaultMemory(const Parameters& p_in, int N){
       Parameters p = p_in;
       if (p.memory <= 0) {
         p.memory = std::min(N / 2 + 1, 30);
@@ -206,7 +206,7 @@ namespace cuda_solvers::aaj{
     }
     
     inline void handleErrorAndUpdate(real &error, const real &newerror,
-                                     const Parameters& aaj) {
+                                     Parameters& aaj) {
       
     static int iterationsIncreasingError = 0;
     if (newerror > error || std::isnan(newerror) || std::isinf(newerror)) {

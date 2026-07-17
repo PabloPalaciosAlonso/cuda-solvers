@@ -253,7 +253,7 @@ namespace cuda_solvers::aaj{
   template<class Operator,template<class...> class Vec, class T>
   Result<Vec, T> solve(const Operator &op,
                        const Vec<T> &initialGuess,
-                       Parameters &params,
+                       const Parameters &params,
                        cudaStream_t st){
     
     int N             = initialGuess.size();

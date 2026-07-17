@@ -230,7 +230,7 @@ namespace cuda_solvers::aaj{
     template<template<class...> class Vec>
     inline void updateErrorAndLogging(Workspace<Vec, complex>& work,
                                       real& error,
-                                      const Parameters& params,
+                                      Parameters& params,
                                       int currentIter,
                                       int totalIter, cudaStream_t st){
       
